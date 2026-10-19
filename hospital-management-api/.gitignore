@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+/src/generated/prisma
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Build output
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Prisma generated files, if using a custom output directory
+# Ignore only the generated output, not the Prisma schema

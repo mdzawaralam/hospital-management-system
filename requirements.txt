@@ -1,0 +1,276 @@
+Please give me a layered architecture for Nodejs, need to deelope APIs from scratch.
+
+Below are the requirements.
+Roles:
+a. Admin
+b. Doctor
+c. Receptionist
+d. Patient
+
+Admin will be by default user in the database. Admin will register Doctor and Receptionist, after successfully registration they will get successfull message with login details in mail(will use RabbitMQ). Receptionist will register Patient, patient will also get message with login details in mail (will use RabbitMQ).
+A Patient will visit the hospital, first he will come to reception, the Receptionist register the Patient and assign the appropriate doctor as per disease and doctor availability.
+
+The doctor will login and see the assigned patient, doctor will treat the patient. 
+Admin can see all doctor, receptionist and patient details also can add message or delete any user
+Receptionist can see only patient details and associated doctor
+Doctor can see all associated patient and can add message  or can delete any patient
+patient can see own profile details including treatment details
+
+Need to do:
+- JWT token based authentication
+- Role based authorization
+- prisma client version6 will use
+
+postgresql database will use.
+RabbitMQ will use for sending mail after login successfull
+
+Below are tables:
+role table:
+id ,
+roleName string,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+Admin table:
+id ,
+emailAddress string,
+password string,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+doctor table:
+id ,
+fullName string,
+mobileNumber string,
+emailAddress string,
+password string,
+roleId integer,
+qualificationId integer,
+address string,
+city string,
+country string,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+receptionist table:
+id ,
+fullName string,
+mobileNumber string,
+emailAddress string,
+password string,
+qualificationId integer,
+roleId integer,
+address string,
+city string,
+country string,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+patient table:
+id ,
+fullName string,
+mobileNumber string,
+emailAddress string,
+password string,
+diseaseId integer,
+doctorId integer,
+roleId integer,
+address string,
+city string,
+country string,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+patientTreatment table:
+id ,
+patientId integer,
+doctorId integer,
+treatmentDetails text,
+medicineName text,
+testDetails text,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+specialist table:
+id integer,
+doctorId integer,
+specialistName string,
+description text,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+slots table:
+id integer,
+slotTime string,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+weekSlot table:
+id integer,
+weekName string,
+slotId integer,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+
+disease table:
+id ,
+diseaseName string,
+description text,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+doctorAvailable table
+id ,
+doctorId integer,
+weekSlotId integer,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+qualification table:
+id ,
+name string,
+description text,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+
+message table
+id ,
+fromUserId integer,
+fromRoleId integer,
+ToUserId integer,
+ToRoleId integer,
+message text,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+consultationFee table:
+id ,
+patientId integer,
+doctorId integer
+consultFee float,
+message text,
+createdAt datetime,
+updatedAt datetime,
+status boolean default true
+
+
+
+Here is our initial API contract. All routes are prefixed with /api.
+Method				Endpoint										Access
+POST				/auth/login										Public
+POST				/auth/refresh									Refresh-token policy
+POST				/auth/logout									Authenticated
+POST				/admin/doctors									Admin
+POST				/admin/qualification							Admin
+GET					/admin/doctors									Admin
+POST				/admin/receptionists							Admin
+GET					/admin/users									Admin
+PATCH				/admin/users/:id								Admin
+DELETE				/admin/users/:id								Admin, preferably soft delete
+POST				/receptionist/patients							Receptionist
+GET					/receptionist/patients							Receptionist
+POST				/receptionist/appointments						Receptionist
+GET					/receptionist/appointments						Receptionist
+GET					/doctor/patients								Doctor, assigned patients only
+GET					/doctor/appointments							Doctor
+POST				/doctor/treatments								Doctor
+POST				/doctor/patients/:patientId/messages			Doctor, assigned patients only
+GET					/patient/me										Patient
+GET					/patient/me/appointments						Patient
+GET					/patient/me/treatments							Patient
+GET					/patient/me/messages							Patient
+
+
+http://localhost:5000/api/auth/login
+Public
+POST
+{
+    "emailAddress": "admin@hospital.com",
+    "password": "admin123#"
+}
+
+
+http://localhost:5000/api/auth/refresh
+Public
+POST
+{
+  "refreshToken": "w"
+}
+
+http://localhost:5000/api/auth/logout
+Priate
+post
+{
+  "refreshToken": "w"
+}
+
+http://localhost:5000/api/admin/qualification
+private
+Role: Admin
+POST
+{
+  "name": "PHD",
+  "description": "PHD in medicine"
+}
+
+http://localhost:5000/api/admin/qualification
+private
+Role, Admin, Doctor, Receptionist
+GET
+
+
+http://localhost:5000/api/admin/qualification/1
+Role: Admin
+PUT
+{
+  "name": "MBBS Dental",
+  "description": "Bachelor of Medicine and Bachelor of Surgery"
+}
+
+http://localhost:5000/api/admin/qualification/2
+Role: Admin
+Delete
+
+http://localhost:5000/api/admin/doctor
+Acces by Admin only
+POST 
+{
+  "fullName": "Dr. Ahmed Khan",
+  "mobileNumber": "9876543210",
+  "emailAddress": "mdzawaralam@gmail.com",
+  "qualificationId": 1,
+  "address": "Madhapur",
+  "city": "Hyderabad",
+  "country": "India"
+}
+
+http://localhost:5000/api/admin/doctor/2
+Acces by Admin only
+PUT
+{
+  "fullName": "Md zawar alam",
+  "mobileNumber": "9398353805",
+  "qualificationId": 1,
+  "address": "MCH Colony11",
+  "city": "Hyderabad",
+  "country": "India"
+}
+
+http://localhost:5000/api/admin/doctor/2
+Acces by Admin only
+DELETESoft delete

@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  roleName  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    Boolean  @default(true)
+
+  users User[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  emailAddress String   @unique
+  passwordHash String
+  roleId       Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  status       Boolean  @default(true)
+
+  role             Role           @relation(fields: [roleId], references: [id])
+  doctor           Doctor?
+  receptionist     Receptionist?
+  patient          Patient?
+  refreshTokens    RefreshToken[]
+  sentMessages     Message[]      @relation("MessageFromUser")
+  receivedMessages Message[]      @relation("MessageToUser")
+
+  @@index([roleId, status])
+}
+
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model Doctor {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  fullName        String
+  mobileNumber    String
+  qualificationId Int
+  address         String
+  city            String
+  country         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  status          Boolean  @default(true)
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualification Qualification @relation(fields: [qualificationId], references: [id])
+
+  assignedPatients Patient[]          @relation("PatientAssignedDoctor")
+  treatments       PatientTreatment[]
+  specialists      Specialist[]
+  availabilities   DoctorAvailable[]
+  consultationFees ConsultationFee[]
+
+  @@index([qualificationId])
+}
+
+model Receptionist {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  fullName        String
+  mobileNumber    String
+  qualificationId Int
+  address         String
+  city            String
+  country         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  status          Boolean  @default(true)
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualification Qualification @relation(fields: [qualificationId], references: [id])
+
+  @@index([qualificationId])
+}
+
+model Patient {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  fullName     String
+  mobileNumber String
+  diseaseId    Int
+  doctorId     Int?
+  address      String
+  city         String
+  country      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  status       Boolean  @default(true)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  disease Disease @relation(fields: [diseaseId], references: [id])
+  doctor  Doctor? @relation("PatientAssignedDoctor", fields: [doctorId], references: [id])
+
+  treatments       PatientTreatment[]
+  consultationFees ConsultationFee[]
+
+  @@index([diseaseId])
+  @@index([doctorId])
+}
+
+model PatientTreatment {
+  id               Int      @id @default(autoincrement())
+  patientId        Int
+  doctorId         Int
+  treatmentDetails String   @db.Text
+  medicineName     String   @db.Text
+  testDetails      String   @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  status           Boolean  @default(true)
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+
+  @@index([patientId])
+  @@index([doctorId])
+}
+
+model Specialist {
+  id             Int      @id @default(autoincrement())
+  doctorId       Int
+  specialistName String
+  description    String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  status         Boolean  @default(true)
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+
+  @@index([doctorId])
+}
+
+model Slots {
+  id        Int      @id @default(autoincrement())
+  slotTime  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    Boolean  @default(true)
+
+  weekSlots WeekSlot[]
+}
+
+model WeekSlot {
+  id        Int      @id @default(autoincrement())
+  weekName  String
+  slotId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    Boolean  @default(true)
+
+  slot           Slots             @relation(fields: [slotId], references: [id])
+  availabilities DoctorAvailable[]
+
+  @@unique([weekName, slotId])
+  @@index([slotId])
+}
+
+model Disease {
+  id          Int      @id @default(autoincrement())
+  diseaseName String   @unique
+  description String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  status      Boolean  @default(true)
+
+  patients Patient[]
+}
+
+model DoctorAvailable {
+  id         Int      @id @default(autoincrement())
+  doctorId   Int
+  weekSlotId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  status     Boolean  @default(true)
+
+  doctor   Doctor   @relation(fields: [doctorId], references: [id])
+  weekSlot WeekSlot @relation(fields: [weekSlotId], references: [id])
+
+  @@unique([doctorId, weekSlotId])
+  @@index([weekSlotId])
+}
+
+model Qualification {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  status      Boolean  @default(true)
+
+  doctors       Doctor[]
+  receptionists Receptionist[]
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  fromUserId Int
+  toUserId   Int
+  message    String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  status     Boolean  @default(true)
+
+  fromUser User @relation("MessageFromUser", fields: [fromUserId], references: [id])
+  toUser   User @relation("MessageToUser", fields: [toUserId], references: [id])
+
+  @@index([fromUserId, createdAt])
+  @@index([toUserId, createdAt])
+}
+
+model ConsultationFee {
+  id         Int      @id @default(autoincrement())
+  patientId  Int
+  doctorId   Int
+  consultFee Decimal  @db.Decimal(10, 2)
+  message    String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  status     Boolean  @default(true)
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+
+  @@index([patientId])
+  @@index([doctorId])
+}
