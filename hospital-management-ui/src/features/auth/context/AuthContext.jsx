@@ -30,10 +30,9 @@ export function AuthProvider({ children }) {
         try {
             const data = await authService.login(credentials);
 
-            const accessToken = data.accessToken;
-            const refreshToken = data.refreshToken;
-            const authenticatedUser = data.user;
-
+            const accessToken = data.data.accessToken;
+            const refreshToken = data.data.refreshToken;
+            const authenticatedUser = data.data.user;
             if (!accessToken || !authenticatedUser) {
                 throw new Error(
                     'The login API response is missing the user or access token.'
