@@ -11,22 +11,18 @@ const receptionistFields = {
 };
 
 export const createReceptionistSchema = z.object({
-    body: z.object({
-        emailAddress: z.string().trim().email().max(254),
-        ...receptionistFields,
-    }).strict(),
-});
+    emailAddress: z.string().trim().email().max(254),
+    ...receptionistFields,
+}).strict();
 
 export const updateReceptionistSchema = z.object({
-    body: z.object({
-        ...Object.fromEntries(
-            Object.entries(receptionistFields).map(([key, schema]) => [
-                key,
-                schema.optional(),
-            ])
-        ),
-    }).strict().refine(
-        (data) => Object.keys(data).length > 0,
-        { message: "At least one field is required for update" }
+    ...Object.fromEntries(
+        Object.entries(receptionistFields).map(([key, schema]) => [
+            key,
+            schema.optional(),
+        ])
     ),
-});
+}).strict().refine(
+    (data) => Object.keys(data).length > 0,
+    { message: "At least one field is required for update" }
+);

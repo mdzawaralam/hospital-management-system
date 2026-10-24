@@ -273,4 +273,237 @@ PUT
 
 http://localhost:5000/api/admin/doctor/2
 Acces by Admin only
-DELETESoft delete
+DELETE Soft delete
+
+http://localhost:5000/api/admin/doctor
+http://localhost:5000/api/admin/doctor/1
+Get doctor details
+
+
+http://localhost:5000/api/admin/receptionists
+POST,
+Access by Admin
+{
+  "fullName": "Ayesha Khan",
+  "mobileNumber": "9876543210",
+   "emailAddress": "receptionist@example.com",
+  "qualificationId": 1,
+  "address": "Madhapur",
+  "city": "Hyderabad",
+  "country": "India"
+}
+
+http://localhost:5000/api/admin/receptionists/
+http://localhost:5000/api/admin/receptionists/1
+GET, admin, doctor, receptionist
+
+http://localhost:5000/api/admin/receptionists/1
+PUT
+by admin
+{
+  "fullName": "Ayesha Khan Sanam",
+  "mobileNumber": "9876543219",
+  "qualificationId": 1,
+  "address": "Hitech",
+  "city": "Hyderabad",
+  "country": "India"
+}
+
+http://localhost:5000/api/receptionist/patients
+POST,
+Access by Admin, Doctor, Receptionist
+{
+  "fullName": "Mr Sharama",
+  "mobileNumber": "2345678945",
+  "emailAddress": "sharma@example.com",
+  "diseaseId": 1,
+  "doctorId": 3,
+  "address": "Delhi Metro",
+  "city": "Delhi",
+  "country": "India"
+}
+
+http://localhost:5000/api/receptionist/patients
+http://localhost:5000/api/receptionist/patients/1
+GET, admin, doctor, receptionist
+
+http://localhost:5000/api/receptionist/patients/1
+PUT
+Access by Admin, Doctor, Receptionist
+{
+  "fullName": "Mr Sharama",
+  "mobileNumber": "2345678945",
+  "emailAddress": "sharma@example.com",
+  "diseaseId": 1,
+  "doctorId": 3,
+  "address": "Delhi Metro",
+  "city": "Delhi",
+  "country": "India"
+}
+
+http://localhost:5000/api/receptionist/disease
+POST
+Admin, Doctor, Receptionist
+
+{
+  "diseaseName": "Heart Issues",
+  "description": "A chronic condition affecting blood glucose regulation."
+}
+
+
+http://localhost:5000/api/receptionist/disease/1
+PUT
+Admin, Doctor, Receptionist
+
+{
+  "diseaseName": "Diabetes type 2",
+  "description": "A chronic condition affecting blood glucoses regulation."
+}
+
+http://localhost:5000/api/receptionist/disease/
+http://localhost:5000/api/receptionist/disease/1
+GET 
+Admin, Doctor, Receptionist
+
+
+http://localhost:5000/api/receptionist/specialist
+POST
+access by Receptionist
+{
+  "doctorId": 1,
+  "specialistName": "Cardiology",
+  "description": "Specialist in heart and cardiovascular diseases."
+}
+
+http://localhost:5000/api/receptionist/specialist
+http://localhost:5000/api/receptionist/specialist/1
+GET
+access by Receptionist
+
+
+http://localhost:5000/api/receptionist/specialist/1
+PUT
+access by Receptionist
+{
+  "doctorId": 1,
+  "specialistName": "Cardiology",
+  "description": "Specialist in heart and cardiovascular diseases!."
+}
+
+http://localhost:5000/api/receptionist/specialist/1
+DELETE
+access by Receptionist
+
+http://localhost:5000/api/receptionist/slots/
+POST: 
+Access by Receptionist, Admin
+{
+  "slotTime": "13:00-14:00"
+}
+
+http://localhost:5000/api/receptionist/slots/1
+PUT
+Access by Receptionist, Admin
+{
+  "slotTime": "13:00-14:00"
+}
+
+
+http://localhost:5000/api/receptionist/slots/1
+GET
+Access by Receptionist, Admin, Doctor
+
+http://localhost:5000/api/receptionist/slots/1
+Access by Receptionist, Admin
+DELETE
+
+http://localhost:5000/api/receptionist/weekslots
+Admin, Receptionist
+POST
+{
+  "weekName": "Saturday",
+  "slotId": 2
+}
+
+http://localhost:5000/api/receptionist/weekslots/1
+Admin, Receptionist
+PUT
+{
+  "weekName": "Saturday",
+  "slotId": 2
+}
+
+http://localhost:5000/api/receptionist/weekslots/
+http://localhost:5000/api/receptionist/weekslots/1
+
+GET
+Admin, Receptionist, Doctor
+
+http://localhost:5000/api/receptionist/weekslots/1
+DELETE
+Admin, Receptionist
+
+
+http://localhost:5000/api/doctor/availability
+POST
+Doctor, Receptionist
+
+{
+  "doctorId": 2,
+  "weekSlotId": 4
+}
+
+http://localhost:5000/api/doctor/availability
+http://localhost:5000/api/doctor/availability/1
+GET
+Admin, Doctor, Receptionist
+
+
+http://localhost:5000/api/doctor/availability/1
+PUT
+Admin, Receptionist
+{
+  "doctorId": 2,
+  "weekSlotId": 5
+}
+
+http://localhost:5000/api/doctor/availability/1
+DELETE
+Admin, Receptionist
+
+
+
+http://localhost:5000/api/patient/treatment
+POST
+Doctor
+
+{
+  "patientId": 2,
+  "doctorId": 3,
+  "treatmentDetails": "Patient diagnosed with a heart infection. Follow-up recommended.",
+  "medicineName": "Medicine A - as prescribed",
+  "testDetails": "Complete blood count (CBC)"
+}
+
+http://localhost:5000/api/patient/treatment/1
+PUT
+Doctor
+
+{
+  "patientId": 2,
+  "doctorId": 3,
+  "treatmentDetails": "Patient diagnosed with a heart infection. Follow-up recommended.",
+  "medicineName": "Medicine A - as prescribed",
+  "testDetails": "Complete blood count (CBC)"
+}
+
+
+http://localhost:5000/api/patient/treatment/
+http://localhost:5000/api/patient/treatment/1
+GET
+Admin, Doctor, Receptionist, Patient
+
+
+http://localhost:5000/api/patient/treatment/1
+DELETE
+Doctor

@@ -155,7 +155,7 @@ model Specialist {
 
 model Slots {
   id        Int      @id @default(autoincrement())
-  slotTime  String
+  slotTime  String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status    Boolean  @default(true)
@@ -242,9 +242,41 @@ model ConsultationFee {
   updatedAt  DateTime @updatedAt
   status     Boolean  @default(true)
 
-  patient Patient @relation(fields: [patientId], references: [id])
-  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+  patient  Patient   @relation(fields: [patientId], references: [id])
+  doctor   Doctor    @relation(fields: [doctorId], references: [id])
+  payments Payment[]
 
   @@index([patientId])
   @@index([doctorId])
+}
+
+enum PaymentMethod {
+  CASH
+  RAZORPAY
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id                Int           @id @default(autoincrement())
+  consultationFeeId Int
+  paymentMethod     PaymentMethod
+  paymentStatus     PaymentStatus @default(PENDING)
+
+  transactionId  String? @unique
+  gatewayOrderId String? @unique
+  notes          String? @db.Text
+
+  receivedByUserId Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  consultationFee ConsultationFee @relation(fields: [consultationFeeId], references: [id], onDelete: Restrict)
+
+  @@index([consultationFeeId, paymentStatus])
 }

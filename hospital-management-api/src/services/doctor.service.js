@@ -43,7 +43,8 @@ export const doctorService = {
         }
 
         // Generate a random temporary password. Never log this value.
-        const temporaryPassword = randomBytes(18).toString("base64url");
+        // const temporaryPassword = randomBytes(18).toString("base64url");
+        const temporaryPassword = "Doctor123#";
         const passwordHash = await bcrypt.hash(temporaryPassword, 12);
 
         let doctor;

@@ -1,69 +1,57 @@
 
-import {
-    createBrowserRouter,
-    Navigate,
-} from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import Login from '../features/auth/pages/Login';
 import Register from '../features/auth/pages/Register';
 import ProtectedRoute from './ProtectedRoute';
 import DashboardRedirect from './DashboardRedirect';
+
+import DashboardLayout from '../components/layout/DashboardLayout';
+
+import AdminDashboard from '../features/admin/pages/AdminDashboard';
+import DoctorDashboard from '../features/doctor/pages/DoctorDashboard';
+import ReceptionistDashboard from '../features/receptionist/pages/ReceptionistDashboard';
+import PatientDashboard from '../features/patient/pages/PatientDashboard';
+
 import { useAuth } from '../features/auth/context/AuthContext';
 
 function HomeRedirect() {
-    const { isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    const roleValue = user?.role?.roleName ?? user?.role;
+    const role = String(roleValue ?? '')
+        .replace(/([a-z])([A-Z])/g, '$1_$2')
+        .replace(/[\s-]+/g, '_')
+        .toUpperCase();
+
+    const dashboardPaths = {
+        ADMIN: '/admin',
+        DOCTOR: '/doctor',
+        RECEPTIONIST: '/receptionist',
+        PATIENT: '/patient',
+    };
 
     return (
         <Navigate
-            to={isAuthenticated ? '/dashboard' : '/login'}
+            to={dashboardPaths[role] ?? '/login'}
             replace
         />
     );
 }
 
-function PlaceholderDashboard({ title }) {
-    const { user, logout } = useAuth();
-
+function AdminPagePlaceholder({ title }) {
     return (
-        <main className="min-h-screen bg-slate-100 p-6 sm:p-10">
-            <section className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow">
-                <h1 className="text-2xl font-bold text-slate-900">
-                    {title}
-                </h1>
-
-                <p className="mt-3 text-slate-600">
-                    Welcome, {user?.fullName || user?.emailAddress || 'User'}.
-                </p>
-
-                <p className="mt-2 text-sm text-slate-500">
-                    This dashboard will be developed in the next phase.
-                </p>
-
-                <button
-                    onClick={logout}
-                    className="mt-6 rounded-lg bg-red-600 px-5 py-3 font-medium text-white hover:bg-red-700"
-                >
-                    Logout
-                </button>
-            </section>
-        </main>
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+            <p className="mt-2 text-slate-600">
+                This page will be implemented next.
+            </p>
+        </section>
     );
-}
-
-function AdminDashboard() {
-    return <PlaceholderDashboard title="Admin Dashboard" />;
-}
-
-function DoctorDashboard() {
-    return <PlaceholderDashboard title="Doctor Dashboard" />;
-}
-
-function ReceptionistDashboard() {
-    return <PlaceholderDashboard title="Receptionist Dashboard" />;
-}
-
-function PatientDashboard() {
-    return <PlaceholderDashboard title="Patient Dashboard" />;
 }
 
 export const router = createBrowserRouter([
@@ -80,39 +68,128 @@ export const router = createBrowserRouter([
         element: <Register />,
     },
     {
-        element: <ProtectedRoute />,
-        children: [
-            {
-                path: '/dashboard',
-                element: <DashboardRedirect />,
-            },
-        ],
+        path: '/dashboard',
+        element: <DashboardRedirect />,
     },
+
+    // ADMIN ROUTES
     {
         element: <ProtectedRoute allowedRoles={['Admin']} />,
         children: [
-            { path: '/admin', element: <AdminDashboard /> },
+            {
+                path: '/admin',
+                element: <DashboardLayout />,
+                children: [
+                    {
+                        index: true,
+                        element: <AdminDashboard />,
+                    },
+                    {
+                        path: 'doctors/register',
+                        element: <AdminPagePlaceholder title="Doctor Registration" />,
+                    },
+                    {
+                        path: 'doctors',
+                        element: <AdminPagePlaceholder title="Doctor List" />,
+                    },
+                    {
+                        path: 'receptionists/register',
+                        element: (
+                            <AdminPagePlaceholder title="Receptionist Registration" />
+                        ),
+                    },
+                    {
+                        path: 'receptionists',
+                        element: <AdminPagePlaceholder title="Receptionist List" />,
+                    },
+                    {
+                        path: 'patients/register',
+                        element: <AdminPagePlaceholder title="Patient Registration" />,
+                    },
+                    {
+                        path: 'patients',
+                        element: <AdminPagePlaceholder title="Patient List" />,
+                    },
+                ],
+            },
         ],
     },
+
+    // DOCTOR ROUTES
     {
         element: <ProtectedRoute allowedRoles={['Doctor']} />,
         children: [
-            { path: '/doctor', element: <DoctorDashboard /> },
+            {
+                path: '/doctor',
+                element: <DashboardLayout />,
+                children: [
+                    { index: true, element: <DoctorDashboard /> },
+                    {
+                        path: 'appointments',
+                        element: <AdminPagePlaceholder title="My Appointments" />,
+                    },
+                    {
+                        path: 'patients',
+                        element: <AdminPagePlaceholder title="My Patients" />,
+                    },
+                    {
+                        path: 'profile',
+                        element: <AdminPagePlaceholder title="My Profile" />,
+                    },
+                ],
+            },
         ],
     },
+
+    // RECEPTIONIST ROUTES
     {
         element: <ProtectedRoute allowedRoles={['Receptionist']} />,
         children: [
             {
                 path: '/receptionist',
-                element: <ReceptionistDashboard />,
+                element: <DashboardLayout />,
+                children: [
+                    { index: true, element: <ReceptionistDashboard /> },
+                    {
+                        path: 'doctors',
+                        element: <AdminPagePlaceholder title="Available Doctors" />,
+                    },
+                    {
+                        path: 'patients/register',
+                        element: <AdminPagePlaceholder title="Patient Registration" />,
+                    },
+                    {
+                        path: 'patients',
+                        element: <AdminPagePlaceholder title="Patient List" />,
+                    },
+                ],
             },
         ],
     },
+
+    // PATIENT ROUTES
     {
         element: <ProtectedRoute allowedRoles={['Patient']} />,
         children: [
-            { path: '/patient', element: <PatientDashboard /> },
+            {
+                path: '/patient',
+                element: <DashboardLayout />,
+                children: [
+                    { index: true, element: <PatientDashboard /> },
+                    {
+                        path: 'profile',
+                        element: <AdminPagePlaceholder title="My Profile" />,
+                    },
+                    {
+                        path: 'appointments',
+                        element: <AdminPagePlaceholder title="My Appointments" />,
+                    },
+                    {
+                        path: 'treatments',
+                        element: <AdminPagePlaceholder title="Treatment History" />,
+                    },
+                ],
+            },
         ],
     },
 ]);

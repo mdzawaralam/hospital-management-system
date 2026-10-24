@@ -46,7 +46,8 @@ export const receptionistService = {
             throw createError("Active qualification not found", 400);
         }
 
-        const temporaryPassword = randomBytes(18).toString("base64url");
+        //const temporaryPassword = randomBytes(18).toString("base64url");
+        const temporaryPassword = "reception";
         const passwordHash = await bcrypt.hash(temporaryPassword, 12);
 
         let receptionist;

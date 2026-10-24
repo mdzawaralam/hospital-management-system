@@ -1,8 +1,23 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 import AuthLayout from '../../../components/AuthLayout';
 import { useAuth } from '../context/AuthContext';
+
+function getDashboardPath(user) {
+    const roleValue = user?.role;
+
+    const role = roleValue;
+    const dashboardPaths = {
+        Admin: '/admin',
+        Doctor: '/doctor',
+        Receptionist: '/receptionist',
+        Patient: '/patient',
+    };
+
+    return dashboardPaths[role] ?? null;
+}
 
 export default function Login() {
     const navigate = useNavigate();
@@ -16,10 +31,10 @@ export default function Login() {
     const [error, setError] = useState('');
 
     function handleChange(event) {
-        setForm({
-            ...form,
+        setForm((previous) => ({
+            ...previous,
             [event.target.name]: event.target.value,
-        });
+        }));
     }
 
     async function handleSubmit(event) {
@@ -27,8 +42,19 @@ export default function Login() {
         setError('');
 
         try {
-            await login(form);
-            navigate('/dashboard', { replace: true });
+            // Authenticate using React Context.
+            const user = await login(form);
+
+            // Determine the destination from the returned user role.
+            const dashboardPath = getDashboardPath(user);
+
+            if (!dashboardPath) {
+                setError('Your account has an unsupported role.');
+                return;
+            }
+
+            // Redirect to the appropriate dashboard.
+            navigate(dashboardPath, { replace: true });
         } catch (err) {
             setError(
                 err.response?.data?.message ||
@@ -45,11 +71,15 @@ export default function Login() {
         >
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                    <label
+                        htmlFor="emailAddress"
+                        className="mb-2 block text-sm font-medium text-slate-700"
+                    >
                         Email address
                     </label>
 
                     <input
+                        id="emailAddress"
                         type="email"
                         name="emailAddress"
                         value={form.emailAddress}
@@ -62,11 +92,15 @@ export default function Login() {
                 </div>
 
                 <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                    <label
+                        htmlFor="password"
+                        className="mb-2 block text-sm font-medium text-slate-700"
+                    >
                         Password
                     </label>
 
                     <input
+                        id="password"
                         type="password"
                         name="password"
                         value={form.password}
@@ -79,7 +113,10 @@ export default function Login() {
                 </div>
 
                 {error && (
-                    <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    <p
+                        role="alert"
+                        className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+                    >
                         {error}
                     </p>
                 )}
@@ -87,7 +124,7 @@ export default function Login() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                    className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {loading ? 'Signing in...' : 'Sign in'}
                 </button>

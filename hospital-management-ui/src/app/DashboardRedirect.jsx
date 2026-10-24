@@ -9,12 +9,12 @@ export default function DashboardRedirect() {
         return <Navigate to="/login" replace />;
     }
 
-    const roleValue = user?.role?.roleName ?? user?.role;
+    const role = user?.role;
 
-    const role = String(roleValue ?? '')
-        .replace(/([a-z])([A-Z])/g, '$1_$2')
-        .replace(/[\s-]+/g, '_')
-        .toUpperCase();
+    /*     const role = String(roleValue ?? '')
+            .replace(/([a-z])([A-Z])/g, '$1_$2')
+            .replace(/[\s-]+/g, '_')
+            .toUpperCase(); */
 
     const dashboardByRole = {
         Admin: '/admin',
