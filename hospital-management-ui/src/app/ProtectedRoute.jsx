@@ -3,18 +3,20 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 
 export default function ProtectedRoute({ allowedRoles }) {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, loading } = useAuth();
 
-    if (!isAuthenticated) {
+    if (loading) {
+        return <div className="p-6">Checking session...</div>;
+    }
+    if (!isAuthenticated || !user) {
         return <Navigate to="/login" replace />;
     }
 
-    const role = user?.role;
+    const role = user?.role?.roleName ?? user?.role;
 
     // Check whether the logged-in user's role is allowed.
-    if (!allowedRoles?.includes(role)) {
-        // Prevent redirecting back into a possible route loop.
-        return <Navigate to="/" replace />;
+    if (allowedRoles && !allowedRoles.includes(role)) {
+        return <Navigate to="/dashboard" replace />;
     }
 
     return <Outlet />;

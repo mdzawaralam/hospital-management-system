@@ -12,6 +12,9 @@ import AdminDashboard from '../features/admin/pages/AdminDashboard';
 import DoctorDashboard from '../features/doctor/pages/DoctorDashboard';
 import ReceptionistDashboard from '../features/receptionist/pages/ReceptionistDashboard';
 import PatientDashboard from '../features/patient/pages/PatientDashboard';
+import DoctorRegistration from '../features/admin/pages/DoctorRegistration';
+import DoctorList from '../features/admin/pages/DoctorList';
+
 
 import { useAuth } from '../features/auth/context/AuthContext';
 
@@ -86,11 +89,11 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: 'doctors/register',
-                        element: <AdminPagePlaceholder title="Doctor Registration" />,
+                        element: <DoctorRegistration />,
                     },
                     {
                         path: 'doctors',
-                        element: <AdminPagePlaceholder title="Doctor List" />,
+                        element: <DoctorList />,
                     },
                     {
                         path: 'receptionists/register',

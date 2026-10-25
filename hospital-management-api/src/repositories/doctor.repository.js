@@ -90,6 +90,7 @@ export const doctorRepository = {
         });
     },
 
+
     async findAllDoctors() {
         return prisma.doctor.findMany({
             where: { status: true },
@@ -105,10 +106,30 @@ export const doctorRepository = {
                 status: true,
                 createdAt: true,
                 updatedAt: true,
+
                 user: {
                     select: {
                         id: true,
                         emailAddress: true,
+                    },
+                },
+                // Get associated qualification name
+                qualification: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+
+                // Associated specialist information
+                specialists: {
+                    where: {
+                        status: true,
+                    },
+                    select: {
+                        id: true,
+                        specialistName: true,
+                        description: true,
                     },
                 },
             },
@@ -117,6 +138,7 @@ export const doctorRepository = {
             },
         });
     },
+
 
     async findDoctorById(id) {
         return prisma.doctor.findUnique({
@@ -137,6 +159,25 @@ export const doctorRepository = {
                     select: {
                         id: true,
                         emailAddress: true,
+                    },
+                },
+                // Get associated qualification name
+                qualification: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+
+                // Associated specialist information
+                specialists: {
+                    where: {
+                        status: true,
+                    },
+                    select: {
+                        id: true,
+                        specialistName: true,
+                        description: true,
                     },
                 },
             },
